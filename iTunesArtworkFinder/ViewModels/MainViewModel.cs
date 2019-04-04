@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Net;
 using System.Windows.Input;
+using iTunesArtworkFinder.Classes;
 using iTunesArtworkFinder.MVVM;
 using iTunesArtworkFinder.Properties;
 using iTunesArtworkFinder.ViewModels.Base;
+using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 
 namespace iTunesArtworkFinder.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
         public ICommand SearchArtworkCommand { get; }
+        public ICommand DownloadArtworkCommand { get; }
 
-        public KeyValuePair<string, string>[] Entities { get; private set; } =
+        public KeyValuePair<string, string>[] Entities { get; } =
         {
             new KeyValuePair<string, string>("tvSeason", "TV Show"),
             new KeyValuePair<string, string>("movie", "Movie"),
@@ -22,13 +29,13 @@ namespace iTunesArtworkFinder.ViewModels
             new KeyValuePair<string, string>("macSoftware", "App (macOS)"),
             new KeyValuePair<string, string>("audiobook", "Audiobook"),
             new KeyValuePair<string, string>("podcast", "Podcast"),
-            new KeyValuePair<string, string>("musicVideo", "Music Video (may not work)"),
+            new KeyValuePair<string, string>("musicVideo", "Music Video"),
             new KeyValuePair<string, string>("id", "Apple ID (Movie)"),
             new KeyValuePair<string, string>("idAlbum", "Apple ID (Album)"),
             new KeyValuePair<string, string>("shortFilm", "Short Film")
         };
 
-        public KeyValuePair<string, string>[] Countries { get; private set; } =
+        public KeyValuePair<string, string>[] Countries { get; } =
         {
             new KeyValuePair<string, string>("ae", "United Arab Emirates"),
             new KeyValuePair<string, string>("ag", "Antigua and Barbuda"),
@@ -197,6 +204,8 @@ namespace iTunesArtworkFinder.ViewModels
 
         private string _searchText = string.Empty;
 
+        private string _initialFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
         public string SelectedEntity
         {
             get => this._selectedEntity;
@@ -228,22 +237,144 @@ namespace iTunesArtworkFinder.ViewModels
             }
         }
 
+        public ObservableCollection<Artwork> Results { get; set; } = new ObservableCollection<Artwork>();
+
+        public bool NoResults => this.Results.Count == 0;
+
+
         public MainViewModel()
         {
             Array.Sort(this.Countries, (x, y) => string.Compare(x.Value, y.Value, StringComparison.CurrentCulture));
 
             this.SearchArtworkCommand = new RelayCommand(SearchArtworksExecute, SearchArtworksCanExecute);
-            //this.SearchArtworkCommand = new RelayCommand(SearchArtworksExecute);
+            this.DownloadArtworkCommand = new RelayCommand(DownloadArtwork);
         }
 
         private void SearchArtworksExecute()
         {
+            string url;
+            string entity = this.SelectedEntity;
+            string country = this.SelectedCountry;
+            string searchText = this.SearchText;
+
+            switch (entity)
+            {
+                case "shortFilm":
+                    url = $"https://itunes.apple.com/search?term={Uri.EscapeUriString(searchText)}&country={country}&entity=movie&attribute=shortFilmTerm";
+                    break;
+                case "id":
+                case "idAlbum":
+                    url = $"https://itunes.apple.com/lookup?id={Uri.EscapeUriString(searchText)}&country={country}";
+                    break;
+                default:
+                    url = $"https://itunes.apple.com/search?term={Uri.EscapeUriString(searchText)}&country={country}&entity={entity}";
+                    break;
+            }
+            url += "&limit=25";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            JObject json;
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                json = JObject.Parse(reader.ReadToEnd());
+            }
+
+            this.Results.Clear();
+            foreach (var result in (JArray)json["results"])
+            {
+                Artwork item = new Artwork
+                {
+                    Title = (this.SelectedEntity == "movie") ? (string) result["trackName"] : (string) result["collectionName"],
+                    Url = ((string) result["artworkUrl100"]).Replace("100x100", "600x600"),
+                    UrlHiRes = ((string) result["artworkUrl100"]).Replace("100x100bb", "100000x100000-999")
+                };
+
+                switch (this.SelectedEntity)
+                {
+                    case "musicVideo":
+                        item.Title = $"{result["trackName"]} (by {result["artistName"]})";
+                        break;
+                    case "tvSeason":
+                        item.Title = $"{result["collectionName"]}";
+                        break;
+                    case "movie":
+                    case "id":
+                    case "shortFilm":
+                        item.Title = (result["trackName"] != null) ? $"{result["trackName"]}" : $"{result["collectionName"]}";
+                        break;
+                    case "ebook":
+                        item.Title = $"{result["trackName"]} (by {result["artistName"]})";
+                        break;
+                    case "album":
+                    case "idAlbum":
+                        item.Title = $"{result["collectionName"]} (by {result["artistName"]})";
+                        break;
+                    case "audiobook":
+                        item.Title = $"{result["collectionName"]} (by {result["artistName"]})";
+                        break;
+                    case "podcast":
+                        item.Title = $"{result["collectionName"]} (by {result["artistName"]})";
+                        break;
+                    case "software":
+                    case "iPadSoftware":
+                    case "macSoftware":
+                        item.Title = $"{result["trackName"]}";
+                        item.Url = (string) result["artworkUrl512"];
+                        item.UrlHiRes = ((string) result["artworkUrl512"]).Replace("512x512bb", "1024x1024bb");
+                        break;
+                    default:
+                        break;
+                }
+
+                this.Results.Add(item);
+            }
+
+            OnPropertyChanged(nameof(this.NoResults));
 
         }
 
         private bool SearchArtworksCanExecute()
         {
             return this.SearchText != string.Empty;
+        }
+
+        private void DownloadArtwork(object parameter)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                FileName = UniqueFilename.NextAvailableFilename( $"{this._initialFolder}\\artwork.jpg"),
+                Filter = "JPEG File Interchange Format (*.jpg)|*.jpg",
+                FilterIndex = 0,
+                InitialDirectory = this._initialFolder
+            };
+            if (saveFileDialog.ShowDialog() != true) return;
+
+            this._initialFolder = Path.GetDirectoryName(saveFileDialog.FileName);
+            
+            /*
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create((BitmapFrame)parameter));
+
+            using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+            {
+                encoder.Save(fileStream);
+            }
+            */
+
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFileCompleted += Client_DownloadFileCompleted;
+                client.DownloadFileAsync(new Uri((string) parameter), saveFileDialog.FileName);
+            }
+        }
+
+        private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            
         }
     }
 }

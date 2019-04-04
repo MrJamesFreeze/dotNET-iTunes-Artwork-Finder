@@ -3,10 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:iTunesArtworkFinder"
              xmlns:mvvm="clr-namespace:iTunesArtworkFinder.MVVM"
+             xmlns:converters="clr-namespace:iTunesArtworkFinder.Converters"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
          <ResourceDictionary>
             <mvvm:ViewModelLocator x:Key="ViewModelLocator"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <FontFamily x:Key="MyriadSetPro">/iTunesArtworkFinder;component/Assets/Fonts/#Myriad Set Pro</FontFamily>
             <FontFamily x:Key="MyriadSetProText">/iTunesArtworkFinder;component/Assets/Fonts/#Myriad Set Pro Text</FontFamily>
         </ResourceDictionary>

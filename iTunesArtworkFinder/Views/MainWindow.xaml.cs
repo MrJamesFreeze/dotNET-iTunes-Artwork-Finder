@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.Specialized;
+using System.Windows;
 
 namespace iTunesArtworkFinder.Views
 {
@@ -10,6 +11,16 @@ namespace iTunesArtworkFinder.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            ((INotifyCollectionChanged)this.ItemsControl.Items).CollectionChanged += OnCollectionChanged;
+        }
+
+        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                this.ScrollViewer.ScrollToHome();
+            }
         }
     }
 }
