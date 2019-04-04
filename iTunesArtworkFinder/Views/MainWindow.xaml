@@ -1,0 +1,74 @@
+﻿<Window x:Class="iTunesArtworkFinder.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:iTunesArtworkFinder"
+        xmlns:viewModels="clr-namespace:iTunesArtworkFinder.ViewModels"
+        mc:Ignorable="d"
+        Title="iTunes Artwork Finder" Height="500" Width="750"
+        
+        DataContext="{Binding MainViewModel, Source={StaticResource ViewModelLocator}}"
+        d:DataContext="d:DesignInstance viewModels:MainViewModel, IsDesignTimeCreatable=False">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush>
+                <GradientStop Color="#ff5e50" Offset="0"/>
+                <GradientStop Color="#fe5c6c" Offset="0.24903756"/>
+                <GradientStop Color="#e3658a" Offset="0.37651777" />
+                <GradientStop Color="#b87eb0" Offset="0.49695423"/>
+                <GradientStop Color="#916cff" Offset="0.626674" />
+                <GradientStop Color="#70bcfb" Offset="0.76279801"/>
+                <GradientStop Color="#21c7fe" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                       Margin="5" Padding="5"
+                       TextAlignment="Center" FontSize="50" FontFamily="{StaticResource MyriadSetProText}"
+                       Text="iTunes Artwork Finder"/>
+
+            <ComboBox Grid.Row="1" Grid.Column="0"
+                      Margin="5" Padding="5"
+                      ItemsSource="{Binding Entities, Mode=OneTime}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedValue="{Binding SelectedEntity, Mode=TwoWay}"/>
+
+            <TextBox Grid.Row="1" Grid.Column="1"
+                     Margin="5" Padding="5">
+                <TextBox.Text>
+                    <Binding Path="SearchText" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"/>
+                </TextBox.Text>
+            </TextBox>
+
+            <ComboBox Grid.Row="1" Grid.Column="2"
+                      Margin="5" Padding="5"
+                      ItemsSource="{Binding Countries, Mode=OneTime}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedValue="{Binding SelectedCountry, Mode=TwoWay}"/>
+
+            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                    Margin="5" Padding="5"
+                    Content="Get the artwork" IsDefault="True"
+                    Command="{Binding SearchArtworkCommand}"/>
+        </Grid>
+
+        <ListView Grid.Row="1" 
+                  Margin="5" Padding="5">
+            
+        </ListView>
+
+    </Grid>
+</Window>

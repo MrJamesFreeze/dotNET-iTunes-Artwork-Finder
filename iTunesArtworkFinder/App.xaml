@@ -1,0 +1,14 @@
+﻿<Application x:Class="iTunesArtworkFinder.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:iTunesArtworkFinder"
+             xmlns:mvvm="clr-namespace:iTunesArtworkFinder.MVVM"
+             StartupUri="Views/MainWindow.xaml">
+    <Application.Resources>
+         <ResourceDictionary>
+            <mvvm:ViewModelLocator x:Key="ViewModelLocator"/>
+            <FontFamily x:Key="MyriadSetPro">/iTunesArtworkFinder;component/Assets/Fonts/#Myriad Set Pro</FontFamily>
+            <FontFamily x:Key="MyriadSetProText">/iTunesArtworkFinder;component/Assets/Fonts/#Myriad Set Pro Text</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
