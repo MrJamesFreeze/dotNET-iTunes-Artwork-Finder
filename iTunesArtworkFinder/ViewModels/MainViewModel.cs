@@ -355,16 +355,6 @@ namespace iTunesArtworkFinder.ViewModels
 
             this._initialFolder = Path.GetDirectoryName(saveFileDialog.FileName);
             
-            /*
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create((BitmapFrame)parameter));
-
-            using (FileStream fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
-            {
-                encoder.Save(fileStream);
-            }
-            */
-
             using (WebClient client = new WebClient())
             {
                 client.DownloadFileCompleted += Client_DownloadFileCompleted;
