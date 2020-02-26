@@ -10,12 +10,14 @@
         xmlns:comment="COMMENTS"
         mc:Ignorable="d comment"
 
-        Title="iTunes Artwork Finder" 
+        Title="iTunes Artwork Finder" Icon="../Assets/Icon.ico"
         Height="750" MinHeight="250" 
         Width="500" MinWidth="500"
 
         DataContext="{Binding MainViewModel, Source={StaticResource ViewModelLocator}}"
-        d:DataContext="d:DesignInstance viewModels:MainViewModel, IsDesignTimeCreatable=False">
+        d:DataContext="d:DesignInstance viewModels:MainViewModel, IsDesignTimeCreatable=False"
+        
+        FocusManager.FocusedElement="{Binding ElementName=SearchArtworkTextBox}">
     <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="0, 0.5" EndPoint="1, 0.5">
@@ -50,7 +52,7 @@
                        TextAlignment="Center" FontSize="50" FontFamily="{StaticResource MyriadSetProText}"
                        Text="iTunes Artwork Finder"/>
 
-            <ComboBox Grid.Row="1" Grid.Column="0"
+            <ComboBox Grid.Row="1" Grid.Column="0" TabIndex="0"
                       Margin="5" Padding="5"
                       TextSearch.TextPath="Value" IsTextSearchEnabled="True" IsTextSearchCaseSensitive="False"
                       ItemsSource="{Binding Entities, Mode=OneTime}" SelectedValuePath="Key" comment:DisplayMemberPath="Value" SelectedValue="{Binding SelectedEntity, Mode=TwoWay}">
@@ -61,7 +63,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <TextBox Grid.Row="1" Grid.Column="1"
+            <TextBox Grid.Row="1" Grid.Column="1" TabIndex="1" x:Name="SearchArtworkTextBox"
                      Margin="5" Padding="5"
                      Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <interactivity:Interaction.Behaviors>
@@ -69,7 +71,7 @@
                 </interactivity:Interaction.Behaviors>
             </TextBox>
 
-            <ComboBox Grid.Row="1" Grid.Column="2"
+            <ComboBox Grid.Row="1" Grid.Column="2" TabIndex="2"
                       Margin="5" Padding="5"
                       TextSearch.TextPath="Value" IsTextSearchEnabled="True" IsTextSearchCaseSensitive="False"
                       ItemsSource="{Binding Countries, Mode=OneTime}" SelectedValuePath="Key" comment:DisplayMemberPath="Value" SelectedValue="{Binding SelectedCountry, Mode=TwoWay}">
@@ -80,7 +82,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" TabIndex="4"
                     Margin="5" Padding="5"
                     Content="Get the artwork" IsDefault="True"
                     Command="{Binding SearchArtworkCommand}"/>
@@ -88,17 +90,20 @@
 
         <Grid Grid.Row="1" Margin="5">
 
-            <Grid ZIndex="1" d:IsHidden="True" Background="White"
+            <Grid ZIndex="1" d:IsHidden="False" Background="White"
                   Visibility="{Binding NoResults, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Margin="25"
+                <TextBlock Margin="25" VerticalAlignment="Top"
                            FontSize="25" FontFamily="{StaticResource MyriadSetProText}"
                            Text="No results" TextAlignment="Center" />
+                <Image Source="../Assets/Icon.png" Stretch="Uniform" StretchDirection="DownOnly" Opacity="0.5"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       MaxHeight="256" MaxWidth="256"/>
             </Grid>
 
             <Grid ZIndex="0">
 
                 <ScrollViewer Name="ScrollViewer" Background="White" Padding="5">
-                    <ItemsControl ItemsSource="{Binding Results}" Name="ItemsControl" HorizontalAlignment="Center">
+                    <ItemsControl ItemsSource="{Binding Results}" Name="ItemsControl" HorizontalAlignment="Center" Margin="25 0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="10" IsSharedSizeScope="True">

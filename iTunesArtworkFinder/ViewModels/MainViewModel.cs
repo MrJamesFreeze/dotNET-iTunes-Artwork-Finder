@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Windows.Input;
@@ -357,12 +358,12 @@ namespace iTunesArtworkFinder.ViewModels
             
             using (WebClient client = new WebClient())
             {
-                client.DownloadFileCompleted += Client_DownloadFileCompleted;
+                client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadFileCompleted);
                 client.DownloadFileAsync(new Uri((string) parameter), saveFileDialog.FileName);
             }
         }
 
-        private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        private void DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
             
         }
