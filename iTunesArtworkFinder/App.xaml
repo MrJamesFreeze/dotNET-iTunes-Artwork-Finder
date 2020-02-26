@@ -6,7 +6,7 @@
              xmlns:converters="clr-namespace:iTunesArtworkFinder.Converters"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         <ResourceDictionary>
+        <ResourceDictionary>
             <mvvm:ViewModelLocator x:Key="ViewModelLocator"/>
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <FontFamily x:Key="MyriadSetPro">/iTunesArtworkFinder;component/Assets/Fonts/#Myriad Set Pro</FontFamily>
@@ -14,3 +14,4 @@
         </ResourceDictionary>
     </Application.Resources>
 </Application>
+    

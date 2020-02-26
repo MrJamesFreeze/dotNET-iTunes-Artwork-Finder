@@ -16,9 +16,7 @@ namespace iTunesArtworkFinder
             AppDomain.CurrentDomain.UnhandledException += (o, args) => 
                 MessageBox.Show($"{((Exception) args.ExceptionObject).Message}",
                     System.Reflection.Assembly.GetExecutingAssembly().GetName().Name,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error,
-                    MessageBoxResult.OK);
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
 
             base.OnStartup(e);
         }
